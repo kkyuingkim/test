@@ -1,7 +1,7 @@
 package com.sparta.week03.controller;
 
 import com.sparta.week03.domain.Memo;
-import com.sparta.week03.domain.MemoRepository;
+import com.sparta.week03.repository.MemoRepository;
 import com.sparta.week03.domain.MemoRequestDto;
 import com.sparta.week03.service.MemoService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +25,13 @@ public class MemoController {
     @GetMapping("/api/memos")
     public List<Memo> getMemos() {
         return memoRepository.findAllByOrderByModifiedAtDesc();
+    }
+
+    @GetMapping("/api/memos/{id}")
+    public Memo getMemos(@PathVariable Long id) {
+        Memo memo = memoRepository.findById(id).orElseThrow(
+                ()->new IllegalArgumentException("memoId가 존재하지 않습니다."));
+        return memo;
     }
 
     @PutMapping("/api/memos/{id}")

@@ -4,6 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="코딩 트리">
+    <meta property="og:description" content="글을 작성해서 코딩력을 올려보아요!">
+    <meta property="og:image" content="images/og_cordingtree.png">
     <title>Timeline Service</title>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -24,231 +27,71 @@
                         let message = response[i];
                         let id = message['id'];
                         let username = message['username'];
+                        let title = message['title']
                         let contents = message['contents'];
-                        let title = message['title'];
                         let modifiedAt = message['modifiedAt'];
-                        addHTML(id, username, contents, title, modifiedAt);
+                        addHTML(id, username, title, contents, modifiedAt);
                     }
                 }
             });
         }
 
-        function addHTML(id, username, contents, title, modifiedAt) {
-            let tempHtml = makeMessage(id, username, contents, title, modifiedAt);
+        function addHTML(id, username, title, contents, modifiedAt) {
+            let tempHtml = makeMessage(id, username, title, contents, modifiedAt);
             $('#cards-box').append(tempHtml);
         }
 
-        function makeMessage(id, username, contents, modifiedAt, title) {
-            return `<div class="card">
-                        <!-- date/username 영역 -->
-                        <div class="metadata">
-                            <div class="date">
-                                ${modifiedAt}
+        function makeMessage(id, name, title, contents, modifiedAt) {
+            return `<a href="detail.html?id=${id}">
+                        <div class="card">
+                            <div class="metadata">
+                               <div id="${id}-name" class="name">
+                                   ${name}
+                               </div>
+                               <div class="date">
+                                   ${modifiedAt}
+                               </div>
                             </div>
-                        <!-- contents 조회/수정 영역-->
-                        <div class="title">
-                            <div id="${id}-title" class="text">
-                                제목은 ${title}
+                        <h2 class='title' id="${id}-title">"${title}"</h2>
+                            <div class="contents" id="${id}-contents" >
+                               ${contents}
                             </div>
-                            <div id="${id}-editarea" class="edit">
-                                <textarea id="${id}-textarea" class="te-edit" name="" id="" cols="30" rows="5"></textarea>
-                            </div>
-                        </div>
-                        <div class="username">
-                            <div id="${id}-username" class="text">
-                                이름은 ${username}
-                            </div>
-                            <div id="${id}-editarea" class="edit">
-                                <textarea id="${id}-textarea" class="te-edit" name="" id="" cols="30" rows="5"></textarea>
-                            </div>
-                        </div>
-                        <div class="contents">
-                            <div id="${id}-contents" class="text">
-                                내용 ${contents}
-                            </div>
-                            <div id="${id}-editarea" class="edit">
-                                <input id="${id}-textarea" class="te-edit" name="" id="" cols="30" rows="5"></input>
-                            </div>
-                        </div>
-                        <!-- 버튼 영역-->
-                        <div class="footer">
-                            <img id="${id}-edit" class="icon-start-edit" src="images/edit.png" alt="" onclick="editPost('${id}')">
-                            <img id="${id}-delete" class="icon-delete" src="images/delete.png" alt="" onclick="deleteOne('${id}')">
-                            <img id="${id}-submit" class="icon-end-edit" src="images/done.png" alt="" onclick="submitEdit('${id}')">
-                        </div>
-                    </div>`;
+                            </a>
+                        </div>`;
         }
 
-        function isValidTitle(title) {
-            if (title == '') {
-                alert('제목을 입력해주세요');
-                return false;
-            }
-            if (title.trim().length > 20) {
-                alert('공백 포함 20자 이하로 입력해주세요');
-                return false;
-            }
-            return true;
-        }
-
-        function isValidContents(contents) {
-            if (contents == '') {
-                alert('내용을 입력해주세요');
-                return false;
-            }
-            if (contents.trim().length > 140) {
-                alert('공백 포함 140자 이하로 입력해주세요');
-                return false;
-            }
-            return true;
-        }
-
-        function isValidUsername(username) {
-            if (username == '') {
-                alert('이름을 입력해주세요');
-                return false;
-            }
-            if (username.length > 4) {
-                alert('4자 이하로 입력해주세요');
-                return false;
-            }
-            return true;
-        }
-
-        function writePost() {
-            let contents = $('#contents').val();
-            let username = $('#username').val();
-            let title = $('#title').val();
-
-            if (isValidTitle(title) == false) {
-                return;
-            }
-
-            if (isValidUsername(username) == false) {
-                return;
-            }
-
-            if (isValidContents(contents) == false) {
-                return;
-            }
-
-            let data = {'username': username, 'contents': contents, 'title': title};
-
-            $.ajax({
-                type: "POST",
-                url: "/api/memos",
-                contentType: "application/json",
-                data: JSON.stringify(data),
-                success: function (response) {
-                    alert('메시지가 성공적으로 작성되었습니다.');
-                    window.location.reload();
-                }
-            });
-        }
-
-        function editPost(id) {
-            showEdits(id);
-            let title = $(`#${id}-title`).text().trim();
-            let username = $(`#${id}-username`).text().trim();
-            let contents = $(`#${id}-contents`).text().trim();
-            $(`#${id}-textarea`).val(title);
-            $(`#${id}-textarea`).val(username);
-            $(`#${id}-textarea`).val(contents);
-        }
-
-        function showEdits(id) {
-            $(`#${id}-editarea`).show();
-            $(`#${id}-submit`).show();
-            $(`#${id}-delete`).show();
-
-            $(`#${id}-title`).hide();
-            $(`#${id}-username`).hide();
-            $(`#${id}-contents`).hide();
-            $(`#${id}-edit`).hide();
-        }
-
-        function hideEdits(id) {
-            $(`#${id}-editarea`).hide();
-            $(`#${id}-submit`).hide();
-            $(`#${id}-delete`).hide();
-
-            $(`#${id}-title`).show();
-            $(`#${id}-username`).show();
-            $(`#${id}-contents`).show();
-            $(`#${id}-edit`).show();
-        }
-
-        function submitEdit(id) {
-            let username = $(`#${id}-username`).val();
-            let contents = $(`#${id}-textarea`).val().trim();
-            let title = $(`#${id}-title`).val();
-            if (isValidTitle(title) == false) {
-                return;
-            }
-            if (isValidUsername(username) == false) {
-                return;
-            }
-            if (isValidContents(contents) == false) {
-                return;
-            }
-            let data = {'username': username, 'contents': contents, 'title': title};
-
-            $.ajax({
-                type: "PUT",
-                url: `/api/memos/${id}`,
-                contentType: "application/json",
-                data: JSON.stringify(data),
-                success: function (response) {
-                    alert('메시지 변경에 성공하였습니다.');
-                    window.location.reload();
-                }
-            });
-        }
-
-        function deleteOne(id) {
-            $.ajax({
-                type: "DELETE",
-                url: `/api/memos/${id}`,
-                success: function (response) {
-                    alert('메시지 삭제에 성공하였습니다.');
-                    window.location.reload();
-                }
-            })
-        }
     </script>
 
     <style>
         @import url(//spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css);
 
-        body {
-            margin: 0px;
+        * {
+            font-family: 'Jua', sans-serif !important;
         }
 
-        .area-edit {
-            display: none;
+        body {
+            margin: 0px;
         }
 
         .wrap {
             width: 538px;
             margin: 10px auto;
+            height: 300px;
         }
 
-        #contents {
-            width: 538px;
+        .to-write{
+            margin-bottom: 0;
         }
 
-        .area-write {
+        .to-write button {
+            padding: 10px;
+            width: 150px;
+            font-size: 20px;
             position: relative;
-            width: 538px;
-        }
-
-        .area-write img {
-            cursor: pointer;
-            position: absolute;
-            width: 22.2px;
-            height: 18.7px;
-            bottom: 15px;
-            right: 17px;
+            margin-left: 450px;
+            margin-top: 100px;
+            margin-bottom: 50px;
+            border-radius: 20px;
         }
 
         .background-header {
@@ -257,7 +100,7 @@
             top: 0px;
             width: 100%;
             height: 428px;
-            background-color: #339af0;
+            background-color: #17781a;
         }
 
         .background-body {
@@ -266,15 +109,14 @@
             top: 428px;
             height: 100%;
             width: 100%;
-            background-color: #dee2e6;
+            background-color: #5c0f13;
         }
 
         .header {
-            margin-top: 50px;
+            margin-top: 170px;
         }
 
         .header h2 {
-            /*font-family: 'Noto Sans KR', sans-serif;*/
             height: 33px;
             font-size: 42px;
             font-weight: 500;
@@ -284,6 +126,7 @@
             letter-spacing: -0.5px;
             text-align: center;
             color: #ffffff;
+            margin-top: 100px;
         }
 
         .header p {
@@ -301,42 +144,19 @@
             color: #ffffff;
         }
 
-        textarea.field {
-            width: 502px !important;
-            height: 146px;
-            border-radius: 5px;
-            background-color: #ffffff;
-            border: none;
-            padding: 18px;
-            resize: none;
-        }
-
-        textarea.field::placeholder {
-            width: 216px;
-            height: 16px;
-            font-family: 'Noto Sans KR', sans-serif;
-            font-size: 16px;
-            font-weight: normal;
-            font-stretch: normal;
-            font-style: normal;
-            line-height: 1;
-            letter-spacing: -0.96px;
-            text-align: left;
-            color: #868e96;
-        }
-
         .card {
             width: 538px;
             border-radius: 5px;
             background-color: #ffffff;
-            margin-bottom: 12px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
         }
 
         .card .metadata {
             position: relative;
             display: flex;
             font-family: 'Spoqa Han Sans';
-            font-size: 11px;
+            font-size: 18px;
             font-weight: normal;
             font-stretch: normal;
             font-style: normal;
@@ -352,8 +172,9 @@
 
         }
 
-        .card .metadata .username {
-            margin-left: 20px;
+        .card .metadata .name {
+            margin-right: 50px;
+
         }
 
         .contents {
@@ -376,41 +197,17 @@
             font-family: 'Spoqa Han Sans';
         }
 
-        .footer {
-            position: relative;
-            height: 40px;
-        }
-
-        .footer img.icon-start-edit {
-            cursor: pointer;
-            position: absolute;
-            bottom: 14px;
-            right: 55px;
-            width: 18px;
-            height: 18px;
-        }
-
-        .footer img.icon-end-edit {
-            cursor: pointer;
-            position: absolute;
-            display: none;
-            bottom: 14px;
-            right: 55px;
-            width: 20px;
-            height: 15px;
-        }
-
-        .footer img.icon-delete {
-            cursor: pointer;
-            position: absolute;
-            bottom: 12px;
-            right: 19px;
-            width: 14px;
-            height: 18px;
-        }
-
         #cards-box {
             margin-top: 12px;
+        }
+
+        .card h2 {
+            margin-left: 30px;
+        }
+
+        a {
+            text-decoration: none;
+            color: #000000;
         }
     </style>
 </head>
@@ -422,31 +219,13 @@
 <div class="background-body">
 
 </div>
-<div class="wrap">
+<<div class="wrap">
     <div class="header">
-        <h2>Timeline Service</h2>
-        <p>
-            공유하고 싶은 소식을 입력해주세요.
-            24시간이 지난 뒤에는 사라집니다.
-        </p>
+        <h2>~Cording Tree~<br><br>
+            Board List Page</h2>
     </div>
-    <div class="area-write">
-        <textarea class="field" placeholder="제목" name="contents" id="title" cols="30"
-                  rows="10"></textarea>
-        <!--            <button class="btn btn-danger" onclick="writePost()">작성하기</button>-->
-
-    </div>
-    <div class="area-write">
-        <textarea class="field" placeholder="이름" name="contents" id="username" cols="30"
-                  rows="10"></textarea>
-        <!--            <button class="btn btn-danger" onclick="writePost()">작성하기</button>-->
-
-    </div>
-    <div class="area-write">
-        <textarea class="field" placeholdr="내용을 입력해주세요" name="contents" id="contents" cols="30"
-                  rows="10"></textarea>
-        <!--            <button class="btn btn-danger" onclick="writePost()">작성하기</button>-->
-        <img src="images/send.png" alt="" onclick="writePost()">
+    <div class="to-write">
+        <button type="button" class="btn btn-primary" onclick="location.href='write.html'"><b>글 쓰 기</b></button>
     </div>
     <div id="cards-box" class="area-read">
         <div class="card">
@@ -467,12 +246,6 @@
                 <div id="1-editarea" class="edit">
                     <textarea id="1-textarea" class="te-edit" name="" id="" cols="30" rows="5"></textarea>
                 </div>
-            </div>
-            <!-- 버튼 영역-->
-            <div class="footer">
-                <img id="1-edit" class="icon-start-edit" src="images/edit.png" alt="" onclick="editPost('1')">
-                <img id="1-delete" class="icon-delete" src="images/delete.png" alt="" onclick="deleteOne('1')">
-                <img id="1-submit" class="icon-end-edit" src="images/done.png" alt="" onclick="submitEdit('1')">
             </div>
         </div>
     </div>
